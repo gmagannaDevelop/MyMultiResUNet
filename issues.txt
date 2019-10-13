@@ -10,3 +10,8 @@ Issues, doubts, etc.
       "
       here = https://github.com/keras-team/keras/pull/9473#issuecomment-372166860
 
+2.- Why is BatchNormalization important?
+
+3.- Should the weights add up to one?
+
+
