@@ -68,21 +68,29 @@ def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3),
     """
 
     use_bias = not batch_norm
-    x = K.layers.Conv2D(
-        filters=filters, 
-        kernel_size=kernel_size, 
-        strides=strides, 
-        padding=padding, 
-        use_bias=use_bias
-    )(x)
-    x = K.layers.BatchNormalization(scale=False)(x)
+    activations = list(
+                    filter(
+                      lambda x: x if x != 'serialize' and x != 'deserialize' else False, 
+                      dir(k.activations)[10:]
+                    )
+                  )  
 
-    if activation is None:
-        return x
+    f = K.layers.Conv2D(
+          filters=filters, 
+          kernel_size=kernel_size, 
+          strides=strides, 
+          padding=padding, 
+          use_bias=use_bias
+        )
 
-    x = K.layers.Activation(activation)(x)
+    y = f(x)
+    if batch_norm:
+        y = K.layers.BatchNormalization(scale=False)(y)
 
-    return x
+    if activation in activations:
+        y = K.layers.Activation(activation)(y)
+
+    return y
 ##
 
 def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] = [0.167, 0.333, 0.5]):
