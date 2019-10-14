@@ -37,7 +37,8 @@ from sklearn.metrics import jaccard_score as jaccard_index
 from timing import time_this
 
 def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3), 
-             padding="same", strides=(1, 1), activation="relu", batch_norm: bool = True):
+             padding: string ="same", strides: Tuple[int] = (1, 1), 
+             activation: string = "relu", batch_norm: bool = True):
     """
         2D Convolutional layers with optional Batch Normalization
         Basically a wrapper for keras.layers.Conv2D, with some add-ons 
@@ -140,7 +141,7 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
       "use_bias": False # should we use bias ?
     }
     # 1x1 filter for conserving dimensions
-    residual1x1 = k.layers.Conv2D(**def_1x1)(prev_layer)
+    residual1x1 = convolve(prev_layer, **def_1x1)
 
     maps_kws = [
       dict(
@@ -151,9 +152,9 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
       ) for i in weights
     ]
     
-    first  = k.layers.Conv2D(**maps_kws[0])(prev_layers)
-    second = k.layers.Conv2D(**maps_kws[1])(first)
-    third  = k.layers.Conv2D(**maps_kws[2])(second)
+    first  = convolve(prev_layers, **maps_kws[0])
+    second = convolve(first, **maps_kws[1])
+    third  = convolve(second, **maps_kws[2])
 
     # Concatenate successive 3x3 convolution maps :
     out = K.layers.Concatenate()([first, second, third])
