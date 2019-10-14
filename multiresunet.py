@@ -224,53 +224,53 @@ def MultiResUNet(input_shape=(256, 256, 3)):
         model: A Keras model instance.
     """
 
-    inputs = K.layers.Input((input_size))
+    inputs = k.layers.Input((input_shape))
 
     mresblock_1 = MultiResBlock(32, inputs)
     pool_1 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_1)
     mresblock_1 = ResPath(32, mresblock_1, 4)
 
     mresblock_2 = MultiResBlock(64, pool_1)
-    pool_2 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_2)
+    pool_2 = k.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_2)
     mresblock_2 = ResPath(64, mresblock_2, 3)
 
     mresblock_3 = MultiResBlock(128, pool_2)
-    pool_3 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_3)
+    pool_3 = k.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_3)
     mresblock_3 = ResPath(128, mresblock_3, 2)
 
     mresblock_4 = MultiResBlock(256, pool_3)
-    pool_4 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_4)
+    pool_4 = k.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_4)
     mresblock_4 = ResPath(256, mresblock_4)
 
     mresblock5 = MultiResBlock(512, pool_4)
 
-    up_6 = K.layers.Conv2DTranspose(256, (2, 2), strides=(2, 2), padding="same")(
+    up_6 = k.layers.Conv2DTranspose(256, (2, 2), strides=(2, 2), padding="same")(
         mresblock5
     )
-    up_6 = K.layers.Concatenate()([up_6, mresblock_4])
+    up_6 = k.layers.Concatenate()([up_6, mresblock_4])
     mresblock_6 = MultiResBlock(256, up_6)
 
-    up_7 = K.layers.Conv2DTranspose(128, (2, 2), strides=(2, 2), padding="same")(
+    up_7 = k.layers.Conv2DTranspose(128, (2, 2), strides=(2, 2), padding="same")(
         mresblock_6
     )
-    up_7 = K.layers.Concatenate()([up_7, mresblock_3])
+    up_7 = k.layers.Concatenate()([up_7, mresblock_3])
     mresblock7 = MultiResBlock(128, up_7)
 
-    up_8 = K.layers.Conv2DTranspose(64, (2, 2), strides=(2, 2), padding="same")(
+    up_8 = k.layers.Conv2DTranspose(64, (2, 2), strides=(2, 2), padding="same")(
         mresblock7
     )
-    up_8 = K.layers.Concatenate()([up_8, mresblock_2])
+    up_8 = k.layers.Concatenate()([up_8, mresblock_2])
     mresblock8 = MultiResBlock(64, up_8)
 
-    up_9 = K.layers.Conv2DTranspose(32, (2, 2), strides=(2, 2), padding="same")(
+    up_9 = k.layers.Conv2DTranspose(32, (2, 2), strides=(2, 2), padding="same")(
         mresblock8
     )
-    up_9 = K.layers.Concatenate()([up_9, mresblock_1])
+    up_9 = k.layers.Concatenate()([up_9, mresblock_1])
     mresblock9 = MultiResBlock(32, up_9)
 
-    conv_10 = conv2d(mresblock9, 1, (1, 1), activation="sigmoid")
+    conv_10 = convolve(mresblock9, 1, (1, 1), activation="sigmoid")
 
-    model = K.models.Model(inputs=[inputs], outputs=[conv_10])
+    model = k.models.Model(inputs=[inputs], outputs=[conv_10])
 
     return model
 ##
