@@ -37,12 +37,16 @@ from sklearn.metrics import jaccard_score as jaccard_index
 from timing import time_this
 
 def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3), 
-             padding: string ="same", strides: Tuple[int] = (1, 1), 
-             activation: string = "relu", batch_norm: bool = True):
+             padding: str ="same", strides: Tuple[int] = (1, 1), 
+             activation: str = "relu", batch_norm: bool = True):
     """
         2D Convolutional layers with optional Batch Normalization
         Basically a wrapper for keras.layers.Conv2D, with some add-ons 
         for ease of use.
+
+        Default values of keyword arguments are set to minimize verbosity
+        when calling the function. Verify them to avoid specifing one with
+        the same value as the default.
 
 ##### Arguments:
                 x: Keras layer, the input to the feature map.
@@ -136,9 +140,6 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
     def_1x1 = {
       "filters": sum(map(lambda x: int(W * x), weights)), 
       "kernel_size": (1, 1), 
-      "strides": (1, 1), 
-      "padding": "same",
-      "use_bias": False # should we use bias ?
     }
     # 1x1 filter for conserving dimensions
     residual1x1 = convolve(prev_layer, **def_1x1)
