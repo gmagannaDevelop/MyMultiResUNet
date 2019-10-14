@@ -49,7 +49,7 @@ def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3),
         the same value as the default.
 
 ##### Arguments:
-                x: Keras layer, the input to the feature map.
+                x: keras layer, the input to the feature map.
           filters: Integer representing the number of filters to use.
       kernel_size: Should probably be called shape.
                    Tuple with two integer values (number of rows, number of columns).
@@ -69,7 +69,7 @@ def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3),
 
 
 ##### Returns:
-                x: A Keras layer.
+                x: A keras layer.
     """
 
     use_bias = not batch_norm
@@ -80,7 +80,7 @@ def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3),
                     )
                   )  
 
-    f = K.layers.Conv2D(
+    f = k.layers.Conv2D(
           filters=filters, 
           kernel_size=kernel_size, 
           strides=strides, 
@@ -90,10 +90,10 @@ def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3),
 
     y = f(x)
     if batch_norm:
-        y = K.layers.BatchNormalization(scale=False)(y)
+        y = k.layers.BatchNormalization(scale=False)(y)
 
     if activation in activations:
-        y = K.layers.Activation(activation)(y)
+        y = k.layers.Activation(activation)(y)
 
     return y
 ##
@@ -112,7 +112,7 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
           W = alpha * U
       
 ##### Arguments:
-          prev_layer: A Keras layer.
+          prev_layer: A keras layer.
                    U: Integer value for the number of filters that would be used
                       in the analogue U-Net, to estimate W which is the number 
                       used in our model.
@@ -131,7 +131,7 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
             
  
 ##### Returns:
-          out: A Keras layer.
+          out: A keras layer.
 
     """
     
@@ -139,7 +139,7 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
     
     def_1x1 = {
       "filters": sum(map(lambda x: int(W * x), weights)), 
-      "kernel_size": (1, 1), 
+      "kernel_size": (1, 1) 
     }
     # 1x1 filter for conserving dimensions
     residual1x1 = convolve(prev_layer, **def_1x1)
@@ -153,33 +153,34 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
       ) for i in weights
     ]
     
-    first  = convolve(prev_layers, **maps_kws[0])
+    first  = convolve(prev_layer, **maps_kws[0])
     second = convolve(first, **maps_kws[1])
     third  = convolve(second, **maps_kws[2])
 
     # Concatenate successive 3x3 convolution maps :
-    out = K.layers.Concatenate()([first, second, third])
+    out = k.layers.Concatenate()([first, second, third])
 
     # And add the new 7x7 map with the 1x1 map, batch normalized
-    out = K.layers.add([residual1x1, out])
-    out = K.layers.Activation("relu")(out)
+    out = k.layers.add([residual1x1, out])
+    out = k.layers.Activation("relu")(out)
 
     return out
 ##
 
 
-def ResPath(encoder_out, layers: int, n_filters: int, batch_norm: bool = True):
+def ResPath(encoder_out, layers: int = 1, 
+            n_filters: int = 32, batch_norm: bool = True):
     """
     """
 
     def_1x1  = {
       "filters": n_filters,
-      "kernel_size": (1, 1), 
+      "kernel_size": (1, 1) 
     }
     
     def_3x3 = {
       "filters": n_filters,
-      "kernel_size": (3, 3), 
+      "kernel_size": (3, 3) 
     }
 
     # First block :
@@ -201,15 +202,15 @@ def ResPath(encoder_out, layers: int, n_filters: int, batch_norm: bool = True):
             y = convolve(y, **def_3x3)
 
             y = k.layers.add([x, y])
-            y = k.layers.Activation("relu")(out)
-            y = k.layers.BatchNormalization()(out)
+            y = k.layers.Activation("relu")(y)
+            y = k.layers.BatchNormalization()(y)
 
     return y
 ##
 
 def MultiResUNet(input_shape=(256, 256, 3)):
     """
-    A Keras implementation of the MultiResUNet architecture as defined in the
+    A keras implementation of the MultiResUNet architecture as defined in the
     following paper:
         https://arxiv.org/abs/1902.04049
     
@@ -221,52 +222,52 @@ def MultiResUNet(input_shape=(256, 256, 3)):
                      describe the input images.
     
     Returns:
-        model: A Keras model instance.
+        model: A keras model instance.
     """
 
     inputs = k.layers.Input((input_shape))
 
-    mresblock_1 = MultiResBlock(32, inputs)
-    pool_1 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_1)
-    mresblock_1 = ResPath(32, mresblock_1, 4)
+    mresblock_1 = MultiResBlock(inputs, 32)
+    pool_1 = k.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_1)
+    mresblock_1 = ResPath(mresblock_1, 4, 32)
 
-    mresblock_2 = MultiResBlock(64, pool_1)
+    mresblock_2 = MultiResBlock(pool_1, 64)
     pool_2 = k.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_2)
-    mresblock_2 = ResPath(64, mresblock_2, 3)
+    mresblock_2 = ResPath(mresblock_2, 3, 64)
 
-    mresblock_3 = MultiResBlock(128, pool_2)
+    mresblock_3 = MultiResBlock(pool_2, 128)
     pool_3 = k.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_3)
-    mresblock_3 = ResPath(128, mresblock_3, 2)
+    mresblock_3 = ResPath(mresblock_3, 2, 128)
 
-    mresblock_4 = MultiResBlock(256, pool_3)
+    mresblock_4 = MultiResBlock(pool_3, 256)
     pool_4 = k.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_4)
-    mresblock_4 = ResPath(256, mresblock_4)
+    mresblock_4 = ResPath(mresblock_4, n_filters=256)
 
-    mresblock5 = MultiResBlock(512, pool_4)
+    mresblock5 = MultiResBlock(pool_4, 512)
 
     up_6 = k.layers.Conv2DTranspose(256, (2, 2), strides=(2, 2), padding="same")(
         mresblock5
     )
     up_6 = k.layers.Concatenate()([up_6, mresblock_4])
-    mresblock_6 = MultiResBlock(256, up_6)
+    mresblock_6 = MultiResBlock(up_6, 256)
 
     up_7 = k.layers.Conv2DTranspose(128, (2, 2), strides=(2, 2), padding="same")(
         mresblock_6
     )
     up_7 = k.layers.Concatenate()([up_7, mresblock_3])
-    mresblock7 = MultiResBlock(128, up_7)
+    mresblock7 = MultiResBlock(up_7, 128)
 
     up_8 = k.layers.Conv2DTranspose(64, (2, 2), strides=(2, 2), padding="same")(
         mresblock7
     )
     up_8 = k.layers.Concatenate()([up_8, mresblock_2])
-    mresblock8 = MultiResBlock(64, up_8)
+    mresblock8 = MultiResBlock(up_8, 64)
 
     up_9 = k.layers.Conv2DTranspose(32, (2, 2), strides=(2, 2), padding="same")(
         mresblock8
     )
     up_9 = k.layers.Concatenate()([up_9, mresblock_1])
-    mresblock9 = MultiResBlock(32, up_9)
+    mresblock9 = MultiResBlock(up_9, 32)
 
     conv_10 = convolve(mresblock9, 1, (1, 1), activation="sigmoid")
 
