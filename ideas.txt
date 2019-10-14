@@ -1,0 +1,5 @@
+
+1.- No es buena idea tener 'bias' y batch normalisation simultáneamente.
+    Propuesta :
+      Tener una bandera para activar/desactivarlos. Siempre dejándolos como
+      complemento el uno del otro.
