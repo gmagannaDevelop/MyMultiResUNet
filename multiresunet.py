@@ -207,4 +207,71 @@ def ResPath(encoder_out, layers: int, n_filters: int, batch_norm: bool = True):
     return y
 ##
 
+def MultiResUNet(input_shape=(256, 256, 3)):
+    """
+    A Keras implementation of the MultiResUNet architecture as defined in the
+    following paper:
+        https://arxiv.org/abs/1902.04049
+    
+    This is a variant of the U-Net, with additional blocks and paths to help mitigate
+    semantic gaps and to obtain better characteristics from the images and maps.
+    
+    Arguments:
+        input_shape: Tuple of three integers (height, width, number of channels) that
+                     describe the input images.
+    
+    Returns:
+        model: A Keras model instance.
+    """
+
+    inputs = K.layers.Input((input_size))
+
+    mresblock_1 = MultiResBlock(32, inputs)
+    pool_1 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_1)
+    mresblock_1 = ResPath(32, mresblock_1, 4)
+
+    mresblock_2 = MultiResBlock(64, pool_1)
+    pool_2 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_2)
+    mresblock_2 = ResPath(64, mresblock_2, 3)
+
+    mresblock_3 = MultiResBlock(128, pool_2)
+    pool_3 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_3)
+    mresblock_3 = ResPath(128, mresblock_3, 2)
+
+    mresblock_4 = MultiResBlock(256, pool_3)
+    pool_4 = K.layers.MaxPooling2D(pool_size=(2, 2))(mresblock_4)
+    mresblock_4 = ResPath(256, mresblock_4)
+
+    mresblock5 = MultiResBlock(512, pool_4)
+
+    up_6 = K.layers.Conv2DTranspose(256, (2, 2), strides=(2, 2), padding="same")(
+        mresblock5
+    )
+    up_6 = K.layers.Concatenate()([up_6, mresblock_4])
+    mresblock_6 = MultiResBlock(256, up_6)
+
+    up_7 = K.layers.Conv2DTranspose(128, (2, 2), strides=(2, 2), padding="same")(
+        mresblock_6
+    )
+    up_7 = K.layers.Concatenate()([up_7, mresblock_3])
+    mresblock7 = MultiResBlock(128, up_7)
+
+    up_8 = K.layers.Conv2DTranspose(64, (2, 2), strides=(2, 2), padding="same")(
+        mresblock7
+    )
+    up_8 = K.layers.Concatenate()([up_8, mresblock_2])
+    mresblock8 = MultiResBlock(64, up_8)
+
+    up_9 = K.layers.Conv2DTranspose(32, (2, 2), strides=(2, 2), padding="same")(
+        mresblock8
+    )
+    up_9 = K.layers.Concatenate()([up_9, mresblock_1])
+    mresblock9 = MultiResBlock(32, up_9)
+
+    conv_10 = conv2d(mresblock9, 1, (1, 1), activation="sigmoid")
+
+    model = K.models.Model(inputs=[inputs], outputs=[conv_10])
+
+    return model
+##
 
