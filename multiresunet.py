@@ -22,14 +22,22 @@ Español :
         https://arxiv.org/abs/1902.04049
 """
 
-from typing import List
+##### Standard imports 
+# Used for type-hints : 
+from typing import List, Tuple
 
+##### Machine Learning-Specific 
+# Main API :
 from tensorflow import keras as k
+# Metrics :
 from sklearn.metrics import jaccard_score as jaccard_index
 
+##### Custom modules 
+# Timing decorators :
 from timing import time_this
 
-def convolve(x, filters, kernel_size, padding="same", strides=(1, 1), activation="relu"):
+def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3), 
+             padding="same", strides=(1, 1), activation="relu"):
     """
         2D Convolutional layers with optional Batch Normalization
         Basically a wrapper for keras.layers.Conv2D, with some add-ons 
@@ -38,13 +46,15 @@ def convolve(x, filters, kernel_size, padding="same", strides=(1, 1), activation
 ##### Arguments:
                 x: Keras layer, the input to the feature map.
           filters: Integer representing the number of filters to use.
-      kernel_size: Tuple with two integer values (number of rows, number of columns).
+      kernel_size: Should probably be called shape.
+                   Tuple with two integer values (number of rows, number of columns).
           padding: String that determines the padding mode.
+                   'valid' or 'same'. See help(keras.layers.Conv2D)
           strides: Tuple of two integer values that represent the strides.
        activation: String that defines the activation function.
 
-    Returns:
-        x: A Keras layer
+##### Returns:
+                x: A Keras layer.
     """
 
     x = K.layers.Conv2D(
