@@ -37,7 +37,7 @@ from sklearn.metrics import jaccard_score as jaccard_index
 from timing import time_this
 
 def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3), 
-             padding="same", strides=(1, 1), activation="relu"):
+             padding="same", strides=(1, 1), activation="relu", batch_norm: bool = True):
     """
         2D Convolutional layers with optional Batch Normalization
         Basically a wrapper for keras.layers.Conv2D, with some add-ons 
@@ -52,13 +52,28 @@ def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3),
                    'valid' or 'same'. See help(keras.layers.Conv2D)
           strides: Tuple of two integer values that represent the strides.
        activation: String that defines the activation function.
+       batch_norm: Boolean flag, switches between using bias and BatchNormalization.
+                   These two are complements so that :
+                      batch_norm = True -->
+                          BatchNormalization = True
+                          use_bias = False
+
+                      batch_norm = False -->
+                          BatchNormalization = False
+                          use_bias = True
+
 
 ##### Returns:
                 x: A Keras layer.
     """
 
+    use_bias = not batch_norm
     x = K.layers.Conv2D(
-        filters, shape, strides=strides, padding=padding, use_bias=False
+        filters=filters, 
+        kernel_size=kernel_size, 
+        strides=strides, 
+        padding=padding, 
+        use_bias=use_bias
     )(x)
     x = K.layers.BatchNormalization(scale=False)(x)
 
