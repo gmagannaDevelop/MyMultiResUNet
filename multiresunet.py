@@ -210,19 +210,6 @@ def ResPath(encoder_out, layers: int = 1,
 
 def MultiResUNet(input_shape=(256, 256, 3)):
     """
-    A keras implementation of the MultiResUNet architecture as defined in the
-    following paper:
-        https://arxiv.org/abs/1902.04049
-    
-    This is a variant of the U-Net, with additional blocks and paths to help mitigate
-    semantic gaps and to obtain better characteristics from the images and maps.
-    
-    Arguments:
-        input_shape: Tuple of three integers (height, width, number of channels) that
-                     describe the input images.
-    
-    Returns:
-        model: A keras model instance.
     """
 
     inputs = k.layers.Input((input_shape))
