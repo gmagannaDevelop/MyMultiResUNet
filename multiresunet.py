@@ -76,7 +76,7 @@ def convolve(x, filters: int = 1, kernel_size: Tuple[int] = (3, 3),
     activations = list(
                     filter(
                       lambda x: x if x != 'serialize' and x != 'deserialize' else False, 
-                      dir(k.activations)[10:]
+                      dir(k.activations)[10:] # These are the methods which are valid activations.
                     )
                   )  
 
@@ -168,7 +168,7 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
 ##
 
 
-def ResPath(encoder_out, filter_size: int, n_filters: int):
+def ResPath(encoder_out, layers: int, n_filters: int, batch_norm: bool = True):
     """
     """
 
@@ -182,13 +182,29 @@ def ResPath(encoder_out, filter_size: int, n_filters: int):
       "kernel_size": (3, 3), 
     }
 
-    x = convolve(encoder_out, **def_1x1)
-    y = convolve(encoder_out, **def_3x3)
-    y = keras.layers.add([x, y])
+    # First block :
+    x = convolve(encoder_out, **def_1x1) # Residual connection
+    y = convolve(encoder_out, **def_3x3) # Feature map
+    y = k.layers.Activation("relu")(
+            k.layers.add(
+                          [x, y]
+            )
+        )
+    if batch_norm:
+        y  = k.layers.BatchNormalization()(y)
 
-    for _ in range(filter_size - 1):
-      pass
-      #x = k.layers.add
+    # Construct paths with variable length, adding feature maps.
+    if layers is not None and layers > 1:
+        for _ in range(layers - 1):
+            x = y
+            x = convolve(x, **def_1x1)
+            y = convolve(y, **def_3x3)
 
+            y = k.layers.add([x, y])
+            y = k.layers.Activation("relu")(out)
+            y = k.layers.BatchNormalization()(out)
+
+    return y
+##
 
 
