@@ -175,22 +175,15 @@ def ResPath(encoder_out, filter_size: int, n_filters: int):
     def_1x1  = {
       "filters": n_filters,
       "kernel_size": (1, 1), 
-      "strides": (1, 1), 
-      "padding": "same",
-      "use_bias": False 
     }
     
     def_3x3 = {
       "filters": n_filters,
       "kernel_size": (3, 3), 
-      "strides": (1, 1), 
-      "activation": "relu", 
-      "padding": "same",
-      "use_bias": False 
     }
 
-    x = k.layers.Conv2D(**def_1x1)(encoder_out)
-    y = k.layers.Conv2D(**def_3x3)(encoder_out)
+    x = convolve(encoder_out, **def_1x1)
+    y = convolve(encoder_out, **def_3x3)
     y = keras.layers.add([x, y])
 
     for _ in range(filter_size - 1):
