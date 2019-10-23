@@ -51,14 +51,15 @@ def time_log(path_to_logfile: str = None) -> Callable:
             result = f(*args, **kw)
             te = time()
             exec_time = te - ts
+            json_cast = lambda x: x if is_jsonable(x) else str(type(x))
             data = {
                 "function": f.__name__,
-                "args": args,
-                "kwargs": kw,
+                "args": [json_cast(arg) for arg in args],
+                "kwargs": {key:json_cast(kw[key]) for key in kw.keys()},
                 "time": exec_time
             }
             with open(path_to_logfile, 'a') as log:
-                log.write(jsp.encode(data)+'\n')
+                log.write(json.dumps(data)+'\n')
             return result
         ##
         return wrap
