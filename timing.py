@@ -1,6 +1,6 @@
 
 import os
-#import json
+import json
 import jsonpickle as jsp
 
 from functools import wraps
@@ -65,3 +65,13 @@ def time_log(path_to_logfile: str = None) -> Callable:
     ##
     return timed
 ##
+
+def is_jsonable(x):
+    """
+        Verify if object is JSON-serializable.
+    """
+    try:
+        json.dumps(x)
+        return True
+    except:
+        return False
