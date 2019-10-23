@@ -1,7 +1,7 @@
 
 import os
 import json
-import jsonpickle as jsp
+import datetime
 
 from functools import wraps
 from time import time
@@ -53,6 +53,7 @@ def time_log(path_to_logfile: str = None) -> Callable:
             exec_time = te - ts
             json_cast = lambda x: x if is_jsonable(x) else str(type(x))
             data = {
+                "datetimeUTC": str(datetime.datetime.utcnow()),
                 "function": f.__name__,
                 "args": [json_cast(arg) for arg in args],
                 "kwargs": {key:json_cast(kw[key]) for key in kw.keys()},
@@ -76,3 +77,4 @@ def is_jsonable(x):
         return True
     except:
         return False
+##
