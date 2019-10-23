@@ -12,13 +12,13 @@ English :
 
 Español :
     Universidad de Guanajuato
-    Division de Ciencias e Ingenierias
-    Grupo de investigacion : DCI-Net
+    División de Ciencias e Ingenierias
+    Grupo de investigación : DCI-Net
     Investigador responsable : Dr. Carlos Padierna
-    Alumno : Gustavo Magaña Lopez
+    Alumno : Gustavo Magaña López
 
         MultiResUNet 
-        Implementacion basada en el siguiente articulo :
+        Implementación basada en el siguiente artículo :
         https://arxiv.org/abs/1902.04049
 """
 
@@ -171,6 +171,10 @@ def MultiResBlock(prev_layer, U: int, alpha: float = 1.67, weights: List[float] 
 def ResPath(encoder_out, layers: int = 1, 
             n_filters: int = 32, batch_norm: bool = True):
     """
+        Create a ResPath, to connect the encoder and decoder stages of the architecture.
+        Possible improvements :
+            Pass def_1x1 and def_3x3 as parameters, to make allow further tweaking
+            and testing of the architecture.
     """
 
     def_1x1  = {

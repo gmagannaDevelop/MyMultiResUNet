@@ -22,9 +22,9 @@ def importa(path: str, alias: str = None):
     exec(f'{alias} = importlib.util.module_from_spec(spec)', globals(), _locals) 
     exec(f'spec.loader.exec_module({alias})', globals(), _locals) 
 
-"""
+
 ## Importar módulo que mide tiempos :
 spec = importlib.util.spec_from_file_location('timing', "drive/My Drive/DCI-Net/timing.py")
 time = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(time)
-"""
+
