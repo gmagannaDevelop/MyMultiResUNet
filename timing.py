@@ -1,6 +1,7 @@
 
 import os
-import json
+#import json
+import jsonpickle as jsp
 
 from functools import wraps
 from time import time
@@ -57,7 +58,7 @@ def time_log(path_to_logfile: str = None) -> Callable:
                 "time": exec_time
             }
             with open(path_to_logfile, 'a') as log:
-                log.write(json.dumps(data)+'\n')
+                log.write(jsp.encode(data)+'\n')
             return result
         ##
         return wrap
